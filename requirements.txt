@@ -1,0 +1,1 @@
+# Droo.py braucht keine Drittanbieter-Pakete (nur Python-Standardbibliothek).

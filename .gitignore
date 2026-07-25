@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+uploads/
+_smoke_uploads/
+*.pem
+_reference/
+_extract_assets.py
+_smoke_test.py
