@@ -3,14 +3,19 @@ Droo.py – UI-Uebersetzungen (aus stackp/Droopy uebernommen).
 
 Projekt:     Droo.py
 Modul:       droo/i18n.py
-Version:     1.0.0
-Stand:       2026-07-25
+Version:     1.1.0
+Stand:       2026-08-10
 Lizenz:      BSD-3-Clause
 Erstellt mit: Cursor KI Model Auto (Composer)
 
 Beschreibung
 ------------
 Sprachtexte fuer Upload-/Erfolgs-/Fehlerseite. Auswahl via Accept-Language.
+
+Historie
+--------
+Version 1.0.0 – 2026-07-25 – Erstveroeffentlichung
+Version 1.1.0 – 2026-08-10 – Versionshistorie an Styleguide angeglichen
 
 Aufruf / Nutzung
 ----------------

@@ -3,8 +3,8 @@ Droo.py – Self-Signed-PEM mit OpenSSL erzeugen.
 
 Projekt:     Droo.py
 Modul:       make_pem.py
-Version:     1.0.0
-Stand:       2026-07-25
+Version:     1.1.0
+Stand:       2026-08-10
 Abhaengig:   OpenSSL im PATH (vorherige Pruefung)
 Bezug:       droo.py --ssl <pem>
 Lizenz:      BSD-3-Clause
@@ -18,7 +18,8 @@ Ausgabeverzeichnis = aktuelles Arbeitsverzeichnis (Startverzeichnis).
 
 Historie
 --------
-2026-07-25  1.0.0  Erstveroeffentlichung
+Version 1.0.0 – 2026-07-25 – Erstveroeffentlichung
+Version 1.1.0 – 2026-08-10 – Versionshistorie an Styleguide angeglichen
 
 Aufruf / Nutzung
 ----------------

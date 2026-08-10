@@ -5,6 +5,7 @@ venv/
 uploads/
 _smoke_uploads/
 *.pem
+droo_*.log
 _reference/
 _extract_assets.py
 _smoke_test.py
