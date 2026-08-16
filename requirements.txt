@@ -1,1 +1,47 @@
-# Droo.py braucht keine Drittanbieter-Pakete (nur Python-Standardbibliothek).
+# Droo.py – Mini-Webserver zum Empfangen von Datei-Uploads.
+#
+# Projekt:     Droo.py
+# Modul:       requirements.txt
+# Version:     1.2.0
+# Stand:       2026-08-16
+# Abhaengig:   nur Python-Standardbibliothek (Python >= 3.10)
+# Bezug:       requirements.txt (leer – Stdlib only)
+# Lizenz:      BSD-3-Clause
+# Upstream:    https://github.com/stackp/Droopy (Pierre Duquesne)
+# Erstellt mit: Cursor KI Model Auto (Composer)
+#
+# Historie
+# --------
+# Version 1.0.0 – 2026-07-25 – Erstveroeffentlichung (leere Datei, Stdlib only)
+# Version 1.1.0 – 2026-08-10 – Hinweistext
+# Version 1.2.0 – 2026-08-16 – Vollstaendiger Dateikopf und Installationsbeispiel
+#
+# -----------------------------------------------------------------------------
+# Installation der erwarteten Abhaengigkeiten (Beispiel)
+# -----------------------------------------------------------------------------
+#
+#   python -m pip install -r requirements.txt
+#
+# Empfohlen in einer virtuellen Umgebung:
+#
+#   python -m venv .venv
+#   .venv\Scripts\activate
+#   python -m pip install -r requirements.txt
+#
+# Linux/macOS (Aktivierung abweichend):
+#
+#   python3 -m venv .venv
+#   source .venv/bin/activate
+#   python -m pip install -r requirements.txt
+#
+# Hinweis:
+# Dieses Projekt nutzt ausschliesslich die Python-Standardbibliothek
+# (Python >= 3.10). Es sind keine Drittanbieter-Pakete einzutragen.
+# pip install -r requirements.txt ist damit ein No-Op (nur Kommentare)
+# und bleibt als reproduzierbarer Installationsweg vorgesehen.
+#
+# Beispiel, falls spaeter ein Paket ergaenzt wird
+# (Zeile einkommentieren bzw. analog anfuegen):
+#
+#   cryptography>=42.0.0
+#

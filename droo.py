@@ -3,8 +3,8 @@ Droo.py – Mini-Webserver zum Empfangen von Datei-Uploads.
 
 Projekt:     Droo.py
 Modul:       droo.py
-Version:     1.1.0
-Stand:       2026-08-10
+Version:     1.2.0
+Stand:       2026-08-16
 Abhaengig:   nur Python-Standardbibliothek (Python ≥ 3.10)
 Bezug:       requirements.txt (leer – Stdlib only)
 Lizenz:      BSD-3-Clause
@@ -24,6 +24,7 @@ Historie
 --------
 Version 1.0.0 – 2026-07-25 – Erstveroeffentlichung Droo.py (Modernisierung von Droopy)
 Version 1.1.0 – 2026-08-10 – Sicherheit (XSS, Upload-Limit) und Styleguide
+Version 1.2.0 – 2026-08-16 – Projekt-Metadaten in allen Projektdateien vereinheitlicht
 
 Aufruf / Nutzung
 ----------------

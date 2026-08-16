@@ -1,5 +1,19 @@
 # Droo.py
 
+```
+Droo.py – Mini-Webserver zum Empfangen von Datei-Uploads.
+
+Projekt:     Droo.py
+Modul:       README.md
+Version:     1.2.0
+Stand:       2026-08-16
+Abhaengig:   nur Python-Standardbibliothek (Python ≥ 3.10)
+Bezug:       requirements.txt (leer – Stdlib only)
+Lizenz:      BSD-3-Clause
+Upstream:    https://github.com/stackp/Droopy (Pierre Duquesne)
+Erstellt mit: Cursor KI Model Auto (Composer)
+```
+
 ## Idee
 
 Manchmal braucht man nur eins: jemandem schnell eine Datei schicken lassen –
@@ -10,7 +24,7 @@ Upload-Seite anbietet. Fertig.
 Modernisierte Neuimplementierung von [stackp/Droopy](https://github.com/stackp/Droopy)
 (Pierre Duquesne). Erzeugt mit Cursor (Composer).
 
-**Version:** 1.1.0 · **Lizenz:** BSD-3-Clause · **Python:** ≥ 3.10
+**Version:** 1.2.0 · **Stand:** 2026-08-16 · **Lizenz:** BSD-3-Clause · **Python:** ≥ 3.10
 
 ## Features
 
@@ -31,9 +45,19 @@ Modernisierte Neuimplementierung von [stackp/Droopy](https://github.com/stackp/D
 - Python ≥ 3.10
 - Keine Drittanbieter-Pakete (nur Standardbibliothek)
 
+Erwartete Abhaengigkeiten installieren (reproduzierbarer Weg, auch wenn
+`requirements.txt` derzeit nur Kommentare enthaelt):
+
 ```bash
-# optional, falls spaeter Abhaengigkeiten dazukommen:
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
+```
+
+Virtuelle Umgebung (empfohlen):
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+python -m pip install -r requirements.txt
 ```
 
 ## Schnellstart
@@ -96,7 +120,7 @@ LAN-IP mit Port nennen; Firewall ggf. oeffnen.
 | `droo/logutil.py` | Optionales UTF-8-Datei-Logging |
 | `droo/templates.py` | HTML/CSS (Layout aus Droopy) |
 | `droo/i18n.py` | UI-Uebersetzungen |
-| `project_meta.py` | Version, Lizenz, Attribution |
+| `project_meta.py` | Version, Lizenz, Attribution; gemeinsame Quelle der Dateikopf-Felder |
 
 ## Hinweise
 

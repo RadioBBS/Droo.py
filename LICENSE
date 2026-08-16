@@ -30,6 +30,16 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ------------------------------------------------------------------------------
+Projekt:     Droo.py
+Modul:       LICENSE
+Version:     1.2.0
+Stand:       2026-08-16
+Abhaengig:   nur Python-Standardbibliothek (Python >= 3.10)
+Bezug:       requirements.txt (leer – Stdlib only)
+Lizenz:      BSD-3-Clause
+Upstream:    https://github.com/stackp/Droopy (Pierre Duquesne)
+Erstellt mit: Cursor KI Model Auto (Composer)
+
 Droo.py is a modernized reimplementation based on Droopy:
 https://github.com/stackp/Droopy
 Created with Cursor (Composer).

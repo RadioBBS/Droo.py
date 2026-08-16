@@ -3,9 +3,12 @@ Droo.py – HTTP-Server und Request-Handler.
 
 Projekt:     Droo.py
 Modul:       droo/server.py
-Version:     1.1.0
-Stand:       2026-08-10
-Lizenz:      BSD-3-Clause (basiert auf stackp/Droopy)
+Version:     1.2.0
+Stand:       2026-08-16
+Abhaengig:   nur Python-Standardbibliothek (Python ≥ 3.10)
+Bezug:       requirements.txt (leer – Stdlib only)
+Lizenz:      BSD-3-Clause
+Upstream:    https://github.com/stackp/Droopy (Pierre Duquesne)
 Erstellt mit: Cursor KI Model Auto (Composer)
 
 Beschreibung
@@ -18,6 +21,7 @@ Historie
 --------
 Version 1.0.0 – 2026-07-25 – Erstveroeffentlichung
 Version 1.1.0 – 2026-08-10 – XSS-Fix, Upload-Limit, TLS-Defaults, Logging
+Version 1.2.0 – 2026-08-16 – Vollstaendiger Dateikopf (Projekt-Metadaten)
 
 Aufruf / Nutzung
 ----------------
