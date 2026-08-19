@@ -10,6 +10,7 @@ Bezug:       requirements.txt (leer – Stdlib only)
 Lizenz:      BSD-3-Clause
 Upstream:    https://github.com/stackp/Droopy (Pierre Duquesne)
 Erstellt mit: Cursor KI Model Auto (Composer)
+Autor:       Frank Heider / RadioBBS
 
 Beschreibung
 ------------
@@ -41,6 +42,7 @@ __license__ = "BSD-3-Clause"
 __created_with__ = "Cursor KI Model Auto (Composer)"
 __upstream__ = "https://github.com/stackp/Droopy"
 __upstream_credit__ = "Pierre Duquesne"
+__author__ = "Frank Heider / RadioBBS"
 __requires__ = "nur Python-Standardbibliothek (Python ≥ 3.10)"
 __requirements_ref__ = "requirements.txt (leer – Stdlib only)"
 
@@ -77,7 +79,8 @@ def metadata_block(module: str) -> str:
         f"Bezug:       {__requirements_ref__}\n"
         f"Lizenz:      {__license__}\n"
         f"Upstream:    {__upstream__} ({__upstream_credit__})\n"
-        f"Erstellt mit: {__created_with__}"
+        f"Erstellt mit: {__created_with__}\n"
+        f"Autor:       {__author__}"
     )
 
 
@@ -116,5 +119,6 @@ def attribution_block() -> str:
     return (
         f"Lizenz:      {__license__}\n"
         f"Upstream:    {__upstream__} ({__upstream_credit__})\n"
-        f"Erstellt mit: {__created_with__}"
+        f"Erstellt mit: {__created_with__}\n"
+        f"Autor:       {__author__}"
     )
