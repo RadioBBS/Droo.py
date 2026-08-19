@@ -61,7 +61,7 @@ from droo.config import (
 )
 from droo.logutil import log_error, log_info, setup_logging
 from droo.server import run_server
-from project_meta import __date__, __license__, __upstream__, __version__
+from project_meta import __date__, __license__, __upstream__, __version__, check_runtime
 
 BANNER = r"""
  _____                
@@ -118,6 +118,7 @@ def main(argv: list[str] | None = None) -> int:
     # CLI-Overrides (ohne Defaults), dann Config-Datei, dann volle Defaults
     # (--help / --version beenden hier bereits via argparse, ohne Banner)
     term = parse_args(ignore_defaults=True)
+    check_runtime()
     assert isinstance(term, dict)
     cfg_path = Path(term.get("config_file", default_configfile()))
     file_cfg = load_options(cfg_path)

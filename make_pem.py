@@ -44,7 +44,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from project_meta import __created_with__, __date__, __license__, __version__
+from project_meta import __created_with__, __date__, __license__, __version__, check_runtime
 
 _ = (__created_with__, __license__)
 
@@ -193,6 +193,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     """CLI-Einstieg."""
     args = parse_args(argv)
+    check_runtime()
     print(f"make_pem.py (Droo.py v{__version__}, {__date__})")
     print(f"Startverzeichnis: {Path.cwd()}\n")
 
