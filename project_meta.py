@@ -10,7 +10,7 @@ Bezug:       requirements.txt (leer – Stdlib only)
 Lizenz:      BSD-3-Clause
 Upstream:    https://github.com/stackp/Droopy (Pierre Duquesne)
 Erstellt mit: Cursor KI Model Auto (Composer)
-Autor:       Frank Heider / RadioBBS
+Autor:       (FFHB) / RadioBBS
 
 Beschreibung
 ------------
@@ -49,7 +49,7 @@ __license__ = "BSD-3-Clause"
 __created_with__ = "Cursor KI Model Auto (Composer)"
 __upstream__ = "https://github.com/stackp/Droopy"
 __upstream_credit__ = "Pierre Duquesne"
-__author__ = "Frank Heider / RadioBBS"
+__author__ = "(FFHB) / RadioBBS"
 __requires__ = "nur Python-Standardbibliothek (Python ≥ 3.10)"
 __requirements_ref__ = "requirements.txt (leer – Stdlib only)"
 
