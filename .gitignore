@@ -1,3 +1,15 @@
+# Droo.py – Mini-Webserver zum Empfangen von Datei-Uploads.
+#
+# Projekt:     Droo.py
+# Modul:       .gitignore
+# Version:     1.2.0
+# Stand:       2026-08-16
+# Abhaengig:   nur Python-Standardbibliothek (Python >= 3.10)
+# Bezug:       requirements.txt (leer – Stdlib only)
+# Lizenz:      BSD-3-Clause
+# Upstream:    https://github.com/stackp/Droopy (Pierre Duquesne)
+# Erstellt mit: Cursor KI Model Auto (Composer)
+
 __pycache__/
 *.pyc
 .venv/
@@ -5,6 +17,7 @@ venv/
 uploads/
 _smoke_uploads/
 *.pem
+droo_*.log
 _reference/
 _extract_assets.py
 _smoke_test.py

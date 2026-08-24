@@ -3,15 +3,24 @@ Droo.py – HTML/CSS-Templates (Layout aus stackp/Droopy).
 
 Projekt:     Droo.py
 Modul:       droo/templates.py
-Version:     1.0.0
-Stand:       2026-07-25
+Version:     1.2.0
+Stand:       2026-08-16
+Abhaengig:   nur Python-Standardbibliothek (Python ≥ 3.10)
+Bezug:       requirements.txt (leer – Stdlib only)
 Lizenz:      BSD-3-Clause
+Upstream:    https://github.com/stackp/Droopy (Pierre Duquesne)
 Erstellt mit: Cursor KI Model Auto (Composer)
 
 Beschreibung
 ------------
 Seiten ``main``, ``success``, ``error`` und ``linkurl`` mit %-Platzhaltern
 fuer i18n und Server-Inhalte.
+
+Historie
+--------
+Version 1.0.0 – 2026-07-25 – Erstveroeffentlichung
+Version 1.1.0 – 2026-08-10 – Versionshistorie an Styleguide angeglichen
+Version 1.2.0 – 2026-08-16 – Vollstaendiger Dateikopf (Projekt-Metadaten)
 
 Aufruf / Nutzung
 ----------------

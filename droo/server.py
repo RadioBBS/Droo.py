@@ -3,16 +3,25 @@ Droo.py – HTTP-Server und Request-Handler.
 
 Projekt:     Droo.py
 Modul:       droo/server.py
-Version:     1.0.0
-Stand:       2026-07-25
-Lizenz:      BSD-3-Clause (basiert auf stackp/Droopy)
+Version:     1.2.0
+Stand:       2026-08-16
+Abhaengig:   nur Python-Standardbibliothek (Python ≥ 3.10)
+Bezug:       requirements.txt (leer – Stdlib only)
+Lizenz:      BSD-3-Clause
+Upstream:    https://github.com/stackp/Droopy (Pierre Duquesne)
 Erstellt mit: Cursor KI Model Auto (Composer)
 
 Beschreibung
 ------------
 Threaded HTTP(S)-Server mit Upload-Formular, optionalen Download-Links,
 Basic-Auth und Bildanzeige. Konfiguration ueber Handler-Fabrik (keine
-Klassen-Globals).
+Klassen-Globals). HTML-Escaping fuer Dateinamen; Upload-Limit; TLS-Defaults.
+
+Historie
+--------
+Version 1.0.0 – 2026-07-25 – Erstveroeffentlichung
+Version 1.1.0 – 2026-08-10 – XSS-Fix, Upload-Limit, TLS-Defaults, Logging
+Version 1.2.0 – 2026-08-16 – Vollstaendiger Dateikopf (Projekt-Metadaten)
 
 Aufruf / Nutzung
 ----------------
@@ -25,6 +34,7 @@ Aufruf / Nutzung
 from __future__ import annotations
 
 import base64
+import html
 import mimetypes
 import secrets
 import shutil
@@ -38,19 +48,20 @@ from socketserver import ThreadingMixIn
 from typing import Dict, Optional
 from urllib.parse import quote, unquote
 
-from droo.config import DrooConfig
+from droo.config import DEFAULT_MAX_UPLOAD, DrooConfig
 from droo.i18n import LOCALISATIONS
+from droo.logutil import log_error, log_info
 from droo.templates import DEFAULT_TEMPLATES
-from droo.upload import list_published_files, safe_join, save_uploads_from_request
+from droo.upload import (
+    MissingContentLengthError,
+    UploadTooLargeError,
+    list_published_files,
+    safe_join,
+    save_uploads_from_request,
+)
 
 FORM_FIELD = "upfile"
 PICTURE_PATH = "/__droo/picture"
-
-DEFAULT_CIPHERS = (
-    "ECDH+AESGCM:ECDH+AES256:ECDH+AES128:ECDH+3DES"
-    ":RSA+AESGCM:RSA+AES:RSA+3DES"
-    ":!aNULL:!MD5:!DSS"
-)
 
 
 class Abort(Exception):
@@ -68,6 +79,8 @@ class HandlerSettings:
     file_mode: Optional[int] = None
     auth: str = ""
     certfile: Optional[Path] = None
+    max_upload: int = DEFAULT_MAX_UPLOAD
+    allow_html_message: bool = False
     templates: Optional[Dict[str, str]] = None
     localisations: Optional[Dict[str, Dict[str, str]]] = None
 
@@ -80,14 +93,23 @@ class HandlerSettings:
 
 
 def make_handler(settings: HandlerSettings):
-    """Erzeugt eine Handler-Klasse mit gebundenen Settings."""
+    """Erzeugt eine Handler-Klasse mit gebundenen Settings.
+
+    Parameter:
+        settings: HandlerSettings-Instanz.
+
+    Rueckgabe:
+        Subklasse von BaseHTTPRequestHandler.
+    """
 
     class DrooUploadHandler(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.0"
         cfg = settings
 
         def log_message(self, fmt: str, *args) -> None:
-            sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % args))
+            line = "%s - %s" % (self.address_string(), fmt % args)
+            sys.stderr.write(line + "\n")
+            log_info("%s", line)
 
         def _header(self, name: str, default: str = "") -> str:
             return self.headers.get(name, default)
@@ -130,20 +152,24 @@ def make_handler(settings: HandlerSettings):
                 if code in locs:
                     lang = code
                     break
-                # language without region
                 short = code.split("-", 1)[0]
                 if short in locs:
                     lang = short
                     break
             return locs.get(lang, locs["en"])
 
+        def _format_message(self) -> str:
+            if not self.cfg.message:
+                return ""
+            text = self.cfg.message
+            if not self.cfg.allow_html_message:
+                text = html.escape(text, quote=True)
+            return f'<div id="message">{text}</div>'
+
         def _html(self, page: str) -> str:
             assert self.cfg.templates is not None
             dico = dict(self._choose_language())
-            if self.cfg.message:
-                dico["message"] = f'<div id="message">{self.cfg.message}</div>'
-            else:
-                dico["message"] = ""
+            dico["message"] = self._format_message()
             if self.cfg.picture and self.cfg.picture.is_file():
                 dico["divpicture"] = (
                     f'<div class="box"><img src="{PICTURE_PATH}"/></div>'
@@ -155,7 +181,8 @@ def make_handler(settings: HandlerSettings):
             if self.cfg.publish_files:
                 for name in list_published_files(self.cfg.directory):
                     encoded = quote(name)
-                    links += f'<a href="/{encoded}">{name}</a>'
+                    safe_name = html.escape(name, quote=True)
+                    links += f'<a href="/{encoded}">{safe_name}</a>'
                 links = f'<div id="files">{links}</div>'
             dico["files"] = links
 
@@ -174,8 +201,8 @@ def make_handler(settings: HandlerSettings):
             if end:
                 self.end_headers()
 
-        def _send_html(self, html: str) -> None:
-            data = html.encode("utf-8")
+        def _send_html(self, html_text: str) -> None:
+            data = html_text.encode("utf-8")
             self._send_headers(
                 200,
                 {
@@ -185,6 +212,20 @@ def make_handler(settings: HandlerSettings):
                 end=True,
             )
             self.wfile.write(data)
+
+        def _send_plain_error(self, code: int, message: str) -> None:
+            body = message.encode("utf-8")
+            self.close_connection = True
+            self._send_headers(
+                code,
+                {
+                    "Content-type": "text/plain; charset=utf-8",
+                    "Content-length": len(body),
+                    "Connection": "close",
+                },
+                end=True,
+            )
+            self.wfile.write(body)
 
         def _send_file(self, localpath: Path) -> None:
             ctype = mimetypes.guess_type(str(localpath))[0] or "application/octet-stream"
@@ -223,6 +264,7 @@ def make_handler(settings: HandlerSettings):
                     directory=self.cfg.directory,
                     form_field=FORM_FIELD,
                     file_mode=self.cfg.file_mode,
+                    max_upload=self.cfg.max_upload,
                 )
                 for path in paths:
                     self.log_message("Received: %s", path.name)
@@ -230,8 +272,15 @@ def make_handler(settings: HandlerSettings):
                     self._send_headers(301, {"Location": "/"}, end=True)
                 else:
                     self._send_html(self._html("success"))
+            except MissingContentLengthError as exc:
+                log_error("%s", exc)
+                self._send_plain_error(411, "Content-Length required")
+            except UploadTooLargeError as exc:
+                log_error("%s", exc)
+                self._send_plain_error(413, "Payload Too Large")
             except Exception as exc:  # noqa: BLE001 — Fehlerseite an Client
                 self.log_message("%r", exc)
+                log_error("Upload-Fehler: %r", exc)
                 self._send_html(self._html("error"))
 
         def handle(self) -> None:
@@ -257,7 +306,15 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 
 def run_server(cfg: DrooConfig, timeout: int = 3 * 60) -> None:
-    """Startet den Droo-Server (blockierend bis KeyboardInterrupt)."""
+    """Startet den Droo-Server (blockierend bis KeyboardInterrupt).
+
+    Parameter:
+        cfg: Laufzeitkonfiguration.
+        timeout: Socket-Timeout in Sekunden.
+
+    Fehlerfaelle:
+        OSError bei Portbindung; ssl.SSLError bei PEM-Problemen.
+    """
     socket.setdefaulttimeout(timeout)
     settings = HandlerSettings(
         directory=cfg.directory,
@@ -267,14 +324,18 @@ def run_server(cfg: DrooConfig, timeout: int = 3 * 60) -> None:
         file_mode=cfg.chmod,
         auth=cfg.auth,
         certfile=cfg.ssl,
+        max_upload=cfg.max_upload,
+        allow_html_message=cfg.allow_html_message,
     )
     handler = make_handler(settings)
     httpd = ThreadedHTTPServer(("", cfg.port), handler)
 
     if cfg.ssl:
+        # Moderne TLS-Defaults der Python-SSLContext (ohne schwache Cipher-Overrides)
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        context.set_ciphers(DEFAULT_CIPHERS)
+        context.minimum_version = ssl.TLSVersion.TLSv1_2
         context.load_cert_chain(certfile=str(cfg.ssl))
         httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 
+    log_info("Server lauscht auf Port %s (max_upload=%s)", cfg.port, cfg.max_upload)
     httpd.serve_forever()

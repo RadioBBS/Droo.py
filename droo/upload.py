@@ -3,9 +3,12 @@ Droo.py – Multipart-Upload ohne cgi (Python ≥ 3.10 / 3.13-tauglich).
 
 Projekt:     Droo.py
 Modul:       droo/upload.py
-Version:     1.0.0
-Stand:       2026-07-25
-Lizenz:      BSD-3-Clause (basiert auf stackp/Droopy)
+Version:     1.2.0
+Stand:       2026-08-16
+Abhaengig:   nur Python-Standardbibliothek (Python ≥ 3.10)
+Bezug:       requirements.txt (leer – Stdlib only)
+Lizenz:      BSD-3-Clause
+Upstream:    https://github.com/stackp/Droopy (Pierre Duquesne)
 Erstellt mit: Cursor KI Model Auto (Composer)
 
 Beschreibung
@@ -13,6 +16,13 @@ Beschreibung
 Parst ``multipart/form-data`` streaming und schreibt Dateiteile direkt in
 Tempdateien unter dem Upload-Verzeichnis (Prefix ``tmpdroopy``). Anschliessend
 Umbenennung mit Nummerierung (``foto.png``, ``foto-1.png``, …).
+Content-Length ist Pflicht; Request-Body wird gegen ``max_upload`` geprueft.
+
+Historie
+--------
+Version 1.0.0 – 2026-07-25 – Erstveroeffentlichung
+Version 1.1.0 – 2026-08-10 – Upload-Limit, Content-Length-Pflicht, exklusives Rename
+Version 1.2.0 – 2026-08-16 – Vollstaendiger Dateikopf (Projekt-Metadaten)
 
 Aufruf / Nutzung
 ----------------
@@ -24,6 +34,7 @@ Aufruf / Nutzung
       headers=handler.headers,
       directory=Path("uploads"),
       form_field="upfile",
+      max_upload=512 * 1024 * 1024,
   )
 """
 
@@ -36,9 +47,12 @@ from email.parser import HeaderParser
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import BinaryIO, List, Mapping, Optional, Protocol, Tuple
 
+from droo.config import DEFAULT_MAX_UPLOAD
+
 
 class _Writable(Protocol):
     def write(self, data: bytes) -> int: ...
+
 
 TMP_PREFIX = "tmpdroopy"
 
@@ -48,6 +62,15 @@ _CONTENT_TYPE_RE = re.compile(
 )
 _NAME_RE = re.compile(r'\bname="([^"]*)"', re.IGNORECASE)
 _FILENAME_RE = re.compile(r'\bfilename="([^"]*)"', re.IGNORECASE)
+_INVALID_FS_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+
+
+class UploadTooLargeError(ValueError):
+    """Request-Body ueberschreitet das konfigurierte Maximum."""
+
+
+class MissingContentLengthError(ValueError):
+    """Content-Length-Header fehlt oder ist ungueltig."""
 
 
 class _NullWriter:
@@ -118,15 +141,35 @@ class _PushbackReader:
 
 
 def basename_only(path: str) -> str:
-    """Extrahiert den Dateinamen (Browser senden manchmal volle Pfade)."""
+    """Extrahiert und bereinigt den Dateinamen (keine Pfadanteile, keine FS-Sonderzeichen).
+
+    Parameter:
+        path: Roher Dateiname oder Pfad aus dem Multipart-Header.
+
+    Rueckgabe:
+        Nur der Basisname; Fallback ``upload.bin``.
+
+    Fehlerfaelle:
+        Keine.
+    """
     name = PurePosixPath(path).name
     name = PureWindowsPath(name).name
     name = Path(name).name
-    return name.strip() or "upload.bin"
+    name = _INVALID_FS_CHARS.sub("_", name)
+    name = name.strip(" .")
+    return name or "upload.bin"
 
 
 def unique_destination(directory: Path, filename: str) -> Path:
-    """Zielpfad ohne Ueberschreiben: name.ext, name-1.ext, name-2.ext, …"""
+    """Zielpfad-Kandidat ohne Existenz-Garantie (siehe claim_destination).
+
+    Parameter:
+        directory: Upload-Ordner.
+        filename: Wunschname.
+
+    Rueckgabe:
+        Erster freier Kandidat (name.ext, name-1.ext, …).
+    """
     directory = Path(directory)
     safe = basename_only(filename)
     candidate = directory / safe
@@ -139,6 +182,37 @@ def unique_destination(directory: Path, filename: str) -> Path:
         if not candidate.exists():
             return candidate
         i += 1
+
+
+def claim_destination(directory: Path, filename: str, tmp_path: Path) -> Path:
+    """Verschiebt tmp exklusiv auf einen freien Zielnamen (Race-sicher).
+
+    Parameter:
+        directory: Upload-Ordner.
+        filename: Wunschname.
+        tmp_path: Vorhandene Tempdatei.
+
+    Rueckgabe:
+        Endgueltiger Zielpfad.
+
+    Fehlerfaelle:
+        OSError bei Dateisystemfehlern.
+    """
+    directory = Path(directory)
+    safe = basename_only(filename)
+    root, ext = os.path.splitext(safe)
+    i = 0
+    while True:
+        name = safe if i == 0 else f"{root}-{i}{ext}"
+        dest = directory / name
+        try:
+            fd = os.open(str(dest), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.close(fd)
+        except FileExistsError:
+            i += 1
+            continue
+        os.replace(str(tmp_path), str(dest))
+        return dest
 
 
 def _parse_boundary(content_type: str) -> bytes:
@@ -165,7 +239,6 @@ def _stream_part_body(reader: _PushbackReader, boundary: bytes, out: _Writable) 
     Returns:
         True wenn weitere Parts folgen, False bei schliessender Boundary (--).
     """
-    # Body ends with: \r\n--boundary(--)?\r\n?
     delimiter = b"\r\n--" + boundary
     buf = bytearray()
     dlen = len(delimiter)
@@ -174,14 +247,12 @@ def _stream_part_body(reader: _PushbackReader, boundary: bytes, out: _Writable) 
         if idx >= 0:
             out.write(buf[:idx])
             after = bytes(buf[idx + dlen :])
-            # after starts with either "--" (end) or "\r\n" (next part) or empty
             if after.startswith(b"--"):
                 reader.push(after[2:])
                 return False
             if after.startswith(b"\r\n"):
                 reader.push(after[2:])
                 return True
-            # Boundary may be followed by nothing yet – peek
             reader.push(after)
             peek = reader.read(2)
             if peek.startswith(b"--"):
@@ -204,39 +275,64 @@ def _stream_part_body(reader: _PushbackReader, boundary: bytes, out: _Writable) 
         buf.extend(chunk)
 
 
+def _require_content_length(headers: Mapping[str, str], max_upload: int) -> int:
+    """Liest und validiert Content-Length gegen max_upload."""
+    cl = None
+    if hasattr(headers, "get"):
+        cl = headers.get("Content-Length") or headers.get("content-length")
+    if cl is None or str(cl).strip() == "":
+        raise MissingContentLengthError("Content-Length-Header fehlt")
+    try:
+        content_length = int(cl)
+    except (TypeError, ValueError) as exc:
+        raise MissingContentLengthError("Content-Length ungueltig") from exc
+    if content_length < 0:
+        raise MissingContentLengthError("Content-Length ungueltig")
+    if content_length > max_upload:
+        raise UploadTooLargeError(
+            f"Upload zu gross: {content_length} Bytes (Maximum {max_upload})"
+        )
+    return content_length
+
+
 def save_uploads_from_request(
     rfile: BinaryIO,
     headers: Mapping[str, str],
     directory: Path,
     form_field: str = "upfile",
     file_mode: Optional[int] = None,
+    max_upload: int = DEFAULT_MAX_UPLOAD,
 ) -> List[Path]:
-    """Parst den Request-Body und speichert alle Dateien des Formularfelds."""
+    """Parst den Request-Body und speichert alle Dateien des Formularfelds.
+
+    Parameter:
+        rfile: Binaerer Request-Stream.
+        headers: HTTP-Header (Content-Type, Content-Length).
+        directory: Upload-Zielordner.
+        form_field: Name des Dateifeldes.
+        file_mode: Optionale oktale Rechte.
+        max_upload: Maximale Body-Groesse in Bytes.
+
+    Rueckgabe:
+        Liste gespeicherter Pfade.
+
+    Fehlerfaelle:
+        MissingContentLengthError, UploadTooLargeError, ValueError, OSError.
+    """
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
 
     content_type = ""
-    content_length = None
     if hasattr(headers, "get"):
         content_type = headers.get("Content-Type", "") or headers.get("content-type", "")
-        cl = headers.get("Content-Length") or headers.get("content-length")
-        if cl:
-            try:
-                content_length = int(cl)
-            except ValueError:
-                content_length = None
+    content_length = _require_content_length(headers, max_upload)
     boundary = _parse_boundary(content_type)
 
-    # Content-Length begrenzen, sonst blockiert rfile.read() nach dem Body
-    stream: BinaryIO = rfile
-    if content_length is not None:
-        stream = _LimitedReader(rfile, content_length)  # type: ignore[assignment]
+    stream: BinaryIO = _LimitedReader(rfile, content_length)  # type: ignore[assignment]
     reader = _PushbackReader(stream)
-    # Preamble until first --boundary
     first = b"--" + boundary
     preamble = reader.read_until(first)
     _ = preamble
-    # After first boundary: optional \r\n then headers, or -- for empty
     peek = reader.read(2)
     if peek == b"--":
         return []
@@ -254,8 +350,7 @@ def save_uploads_from_request(
             try:
                 with os.fdopen(fd, "wb") as tmp:
                     more = _stream_part_body(reader, boundary, tmp)
-                dest = unique_destination(directory, filename)
-                Path(tmp_name).replace(dest)
+                dest = claim_destination(directory, filename, Path(tmp_name))
                 if file_mode is not None:
                     os.chmod(dest, file_mode)
                 saved.append(dest)
@@ -266,14 +361,20 @@ def save_uploads_from_request(
                     pass
                 raise
         else:
-            # Nicht benoetigte Parts verwerfen (kein Tempfile)
             more = _stream_part_body(reader, boundary, _NullWriter())
 
     return saved
 
 
 def list_published_files(directory: Path) -> List[str]:
-    """Dateinamen im Upload-Ordner (ohne Tempdateien), sortiert."""
+    """Dateinamen im Upload-Ordner (ohne Tempdateien), sortiert.
+
+    Parameter:
+        directory: Upload-Ordner.
+
+    Rueckgabe:
+        Sortierte Liste von Dateinamen.
+    """
     directory = Path(directory)
     names: List[str] = []
     if not directory.is_dir():
@@ -286,7 +387,15 @@ def list_published_files(directory: Path) -> List[str]:
 
 
 def safe_join(directory: Path, name: str) -> Optional[Path]:
-    """Join nur wenn die aufgeloeste Datei unter directory liegt."""
+    """Join nur wenn die aufgeloeste Datei unter directory liegt.
+
+    Parameter:
+        directory: Erlaubtes Basisverzeichnis.
+        name: Angeforderter Name/Pfad.
+
+    Rueckgabe:
+        Aufgeloester Dateipfad oder None bei Traversal/Fehlen.
+    """
     directory = directory.resolve()
     base = basename_only(name)
     if not base or base in (".", ".."):

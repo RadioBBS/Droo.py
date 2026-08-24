@@ -1,0 +1,35 @@
+# Droo.py – Python-Projektdefinition.
+#
+# Projekt:     Droo.py
+# Modul:       pyproject.toml
+# Version:     1.2.0
+# Stand:       2026-08-16
+# Abhaengig:   nur Python-Standardbibliothek (Python >= 3.10)
+# Bezug:       requirements.txt (leer – Stdlib only)
+# Lizenz:      BSD-3-Clause
+# Upstream:    https://github.com/stackp/Droopy (Pierre Duquesne)
+# Erstellt mit: Cursor KI Model Auto (Composer)
+# Autor:       (FFHB) / RadioBBS
+#
+# Historie
+# --------
+# Version 1.2.0 – 2026-08-21 – Nachzug pyproject.toml (Software-Standard 1.1.0)
+#
+#   python -m pip install -r requirements.txt
+
+[project]
+name = "droo-py"
+version = "1.2.0"
+description = "Mini-Webserver zum Empfangen von Datei-Uploads."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "BSD-3-Clause" }
+authors = [{ name = "(FFHB) / RadioBBS" }]
+dependencies = [
+]
+
+[project.urls]
+Homepage = "https://github.com/RadioBBS/Droo.py"
+Repository = "https://github.com/RadioBBS/Droo.py"
+Upstream = "https://github.com/stackp/Droopy"
+
