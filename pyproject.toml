@@ -27,3 +27,9 @@ license = { text = "BSD-3-Clause" }
 authors = [{ name = "(FFHB) / RadioBBS" }]
 dependencies = [
 ]
+
+[project.urls]
+Homepage = "https://github.com/RadioBBS/Droo.py"
+Repository = "https://github.com/RadioBBS/Droo.py"
+Upstream = "https://github.com/stackp/Droopy"
+
