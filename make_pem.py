@@ -38,6 +38,8 @@ Danach z. B.:
 
 from __future__ import annotations
 
+import platform
+
 import argparse
 import os
 import shutil
@@ -45,7 +47,15 @@ import subprocess
 import sys
 from pathlib import Path
 
-from project_meta import __created_with__, __date__, __license__, __version__, check_runtime
+from project_meta import (
+    PROJECT_DESCRIPTION,
+    PROJECT_NAME,
+    __created_with__,
+    __date__,
+    __license__,
+    __version__,
+    check_runtime,
+)
 
 _ = (__created_with__, __license__)
 
@@ -191,9 +201,82 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _ausgabe_ist_terminal() -> bool:
+    """Meldet, ob stdout ein Terminal ist.
+
+    Rückgabewert:
+        True bei einem Terminal.
+
+    Fehlerfälle:
+        Eine fehlende isatty-Methode gilt als kein Terminal.
+
+    Beispiel:
+        _ausgabe_ist_terminal()
+    """
+    try:
+        return bool(sys.stdout.isatty())
+    except (AttributeError, ValueError):
+        return False
+
+
+def print_startup_banner() -> None:
+    """Gibt Kurzname, Zweck und Version vor dem Fachlauf aus.
+
+    Rückgabewert:
+        None
+
+    Fehlerfälle:
+        Keine.
+
+    Beispiel:
+        print_startup_banner()
+    """
+    if sys.platform == "win32":
+        os.system("")
+    name = PROJECT_NAME
+    zweck = PROJECT_DESCRIPTION
+    version = __version__
+    stand = __date__
+    innen = f"  {name}  "
+    linie = "═" * len(innen)
+    farbe = "\033[96m" if _ausgabe_ist_terminal() else ""
+    aus = "\033[0m" if farbe else ""
+    print(f"{farbe}╔{linie}╗{aus}")
+    print(f"{farbe}║{innen}║{aus}")
+    print(f"{farbe}╚{linie}╝{aus}")
+    print(zweck)
+    print()
+    print(f"Version {version}  |  {stand}")
+    print()
+
+
+def pruefe_plattform() -> None:
+    """Beendet den Fachlauf, wenn das Betriebssystem nicht zugesagt ist.
+
+    Rückgabewert:
+        None auf einem zugesagten System.
+
+    Fehlerfälle:
+        SystemExit 1 auf anderen Systemen.
+
+    Beispiel:
+        pruefe_plattform()
+    """
+    system = platform.system()
+    if system in {"Windows", "Linux"}:
+        return
+    print(
+        "FEHLER: Dieses Programm läuft unter Windows 11 und Linux "
+        f"(erkannt: {system}).",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
+
 def main(argv: list[str] | None = None) -> int:
     """CLI-Einstieg."""
     args = parse_args(argv)
+    print_startup_banner()
+    pruefe_plattform()
     check_runtime()
     print(f"make_pem.py (Droo.py v{__version__}, {__date__})")
     print(f"Startverzeichnis: {Path.cwd()}\n")

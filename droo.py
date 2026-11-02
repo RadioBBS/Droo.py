@@ -49,6 +49,9 @@ Oeffentliche Einstiege
 
 from __future__ import annotations
 
+import os
+import platform
+
 import sys
 from pathlib import Path
 
@@ -62,7 +65,15 @@ from droo.config import (
 )
 from droo.logutil import log_error, log_info, setup_logging
 from droo.server import run_server
-from project_meta import __date__, __license__, __upstream__, __version__, check_runtime
+from project_meta import (
+    PROJECT_DESCRIPTION,
+    PROJECT_NAME,
+    __date__,
+    __license__,
+    __upstream__,
+    __version__,
+    check_runtime,
+)
 
 BANNER = r"""
  _____                
@@ -101,6 +112,77 @@ def _wait_at_end() -> None:
         pass
 
 
+def _ausgabe_ist_terminal() -> bool:
+    """Meldet, ob stdout ein Terminal ist.
+
+    Rückgabewert:
+        True bei einem Terminal.
+
+    Fehlerfälle:
+        Eine fehlende isatty-Methode gilt als kein Terminal.
+
+    Beispiel:
+        _ausgabe_ist_terminal()
+    """
+    try:
+        return bool(sys.stdout.isatty())
+    except (AttributeError, ValueError):
+        return False
+
+
+def print_startup_banner() -> None:
+    """Gibt Kurzname, Zweck und Version vor dem Fachlauf aus.
+
+    Rückgabewert:
+        None
+
+    Fehlerfälle:
+        Keine.
+
+    Beispiel:
+        print_startup_banner()
+    """
+    if sys.platform == "win32":
+        os.system("")
+    name = PROJECT_NAME
+    zweck = PROJECT_DESCRIPTION
+    version = __version__
+    stand = __date__
+    innen = f"  {name}  "
+    linie = "═" * len(innen)
+    farbe = "\033[96m" if _ausgabe_ist_terminal() else ""
+    aus = "\033[0m" if farbe else ""
+    print(f"{farbe}╔{linie}╗{aus}")
+    print(f"{farbe}║{innen}║{aus}")
+    print(f"{farbe}╚{linie}╝{aus}")
+    print(zweck)
+    print()
+    print(f"Version {version}  |  {stand}")
+    print()
+
+
+def pruefe_plattform() -> None:
+    """Beendet den Fachlauf, wenn das Betriebssystem nicht zugesagt ist.
+
+    Rückgabewert:
+        None auf einem zugesagten System.
+
+    Fehlerfälle:
+        SystemExit 1 auf anderen Systemen.
+
+    Beispiel:
+        pruefe_plattform()
+    """
+    system = platform.system()
+    if system in {"Windows", "Linux"}:
+        return
+    print(
+        "FEHLER: Dieses Programm läuft unter Windows 11 und Linux "
+        f"(erkannt: {system}).",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
+
 def main(argv: list[str] | None = None) -> int:
     """CLI-Einstieg. Gibt Exit-Code zurueck.
 
@@ -119,6 +201,8 @@ def main(argv: list[str] | None = None) -> int:
     # CLI-Overrides (ohne Defaults), dann Config-Datei, dann volle Defaults
     # (--help / --version beenden hier bereits via argparse, ohne Banner)
     term = parse_args(ignore_defaults=True)
+    print_startup_banner()
+    pruefe_plattform()
     check_runtime()
     assert isinstance(term, dict)
     cfg_path = Path(term.get("config_file", default_configfile()))
