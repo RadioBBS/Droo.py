@@ -3,9 +3,9 @@ Droo.py – UI-Uebersetzungen (aus stackp/Droopy uebernommen).
 
 Projekt:     Droo.py
 Modul:       droo/i18n.py
-Version:     1.2.0
-Stand:       2026-08-16
-Abhaengig:   nur Python-Standardbibliothek (Python ≥ 3.10)
+Version:     1.2.1
+Stand:       2026-11-02
+Abhaengig:   nur Python-Standardbibliothek (Python ≥ 3.11)
 Bezug:       requirements.txt (leer – Stdlib only)
 Lizenz:      BSD-3-Clause
 Upstream:    https://github.com/stackp/Droopy (Pierre Duquesne)
@@ -20,6 +20,7 @@ Historie
 Version 1.0.0 – 2026-07-25 – Erstveroeffentlichung
 Version 1.1.0 – 2026-08-10 – Versionshistorie an Styleguide angeglichen
 Version 1.2.0 – 2026-08-16 – Vollstaendiger Dateikopf (Projekt-Metadaten)
+Version 1.2.1 – 2026-11-02 – Startausgabe und Python 3.11 nach Styleguide 2.1.0.
 
 Aufruf / Nutzung
 ----------------

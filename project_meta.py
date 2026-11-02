@@ -3,9 +3,9 @@ Droo.py – Mini-Webserver zum Empfangen von Datei-Uploads.
 
 Projekt:     Droo.py
 Modul:       project_meta.py
-Version:     1.2.0
-Stand:       2026-08-16
-Abhaengig:   nur Python-Standardbibliothek (Python ≥ 3.10)
+Version:     1.2.1
+Stand:       2026-11-02
+Abhaengig:   nur Python-Standardbibliothek (Python ≥ 3.11)
 Bezug:       requirements.txt (leer – Stdlib only)
 Lizenz:      BSD-3-Clause
 Upstream:    https://github.com/stackp/Droopy (Pierre Duquesne)
@@ -24,6 +24,7 @@ Version 1.0.0 – 2026-07-25 – Erstveroeffentlichung
 Version 1.1.0 – 2026-08-10 – Sicherheit und Styleguide-Anpassungen
 Version 1.2.0 – 2026-08-16 – Vollstaendiger Metadaten-Block, alle Pflichtfelder
 Version 1.2.0 – 2026-08-20 – check_runtime(): Python-Mindestversion und optionales Windows
+Version 1.2.1 – 2026-11-02 – Startausgabe und Python 3.11 nach Styleguide 2.1.0.
 
 Aufruf / Nutzung
 ----------------
@@ -40,17 +41,17 @@ import sys
 
 PROJECT_NAME = "Droo.py"
 PROJECT_DESCRIPTION = "Mini-Webserver zum Empfangen von Datei-Uploads."
-PYTHON_REQUIRES = ">=3.10"
+PYTHON_REQUIRES = ">=3.11"
 REQUIRES_WINDOWS = False
 
-__version__ = "1.2.0"
-__date__ = "2026-08-16"
+__version__ = "1.2.1"
+__date__ = "2026-11-02"
 __license__ = "BSD-3-Clause"
 __created_with__ = "Cursor KI Model Auto (Composer)"
 __upstream__ = "https://github.com/stackp/Droopy"
 __upstream_credit__ = "Pierre Duquesne"
 __author__ = "(FFHB) / RadioBBS"
-__requires__ = "nur Python-Standardbibliothek (Python ≥ 3.10)"
+__requires__ = "nur Python-Standardbibliothek (Python ≥ 3.11)"
 __requirements_ref__ = "requirements.txt (leer – Stdlib only)"
 
 ATTRIBUTION_LINES = (
@@ -66,9 +67,9 @@ def min_python_tuple() -> tuple[int, int]:
     """
     Beschreibung: Liest die Mindest-Python-Version aus PYTHON_REQUIRES.
     Parameter: keine
-    Rueckgabewert: Tupel (major, minor), z. B. (3, 10)
+    Rueckgabewert: Tupel (major, minor), z. B. (3, 11)
     Fehlerfaelle: ValueError bei ungueltigem PYTHON_REQUIRES
-    Beispiel: min_python_tuple() == (3, 10)
+    Beispiel: min_python_tuple() == (3, 11)
     """
     match = re.search(r"(\d+)\.(\d+)", PYTHON_REQUIRES)
     if match is None:

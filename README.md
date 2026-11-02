@@ -5,13 +5,17 @@ Droo.py – Mini-Webserver zum Empfangen von Datei-Uploads.
 
 Projekt:     Droo.py
 Modul:       README.md
-Version:     1.2.0
-Stand:       2026-08-16
-Abhaengig:   nur Python-Standardbibliothek (Python ≥ 3.10)
+Version:     1.2.1
+Stand:       2026-11-02
+Abhaengig:   nur Python-Standardbibliothek (Python ≥ 3.11)
 Bezug:       requirements.txt (leer – Stdlib only)
 Lizenz:      BSD-3-Clause
 Upstream:    https://github.com/stackp/Droopy (Pierre Duquesne)
 Erstellt mit: Cursor KI Model Auto (Composer)
+
+Historie
+--------
+Version 1.2.1 – 2026-11-02 – Startausgabe und Python 3.11 nach Styleguide 2.1.0.
 ```
 
 ## Idee
@@ -24,7 +28,7 @@ Upload-Seite anbietet. Fertig.
 Modernisierte Neuimplementierung von [stackp/Droopy](https://github.com/stackp/Droopy)
 (Pierre Duquesne). Erzeugt mit Cursor (Composer).
 
-**Version:** 1.2.0 · **Stand:** 2026-08-16 · **Lizenz:** BSD-3-Clause · **Python:** ≥ 3.10
+**Version:** 1.2.1 · **Stand:** 2026-11-02 · **Lizenz:** BSD-3-Clause · **Python:** ≥ 3.11
 
 ## Features
 
@@ -42,7 +46,7 @@ Modernisierte Neuimplementierung von [stackp/Droopy](https://github.com/stackp/D
 ## Voraussetzungen
 
 - Windows, Linux oder macOS
-- Python ≥ 3.10
+- Python ≥ 3.11
 - Keine Drittanbieter-Pakete (nur Standardbibliothek)
 
 Erwartete Abhaengigkeiten installieren (reproduzierbarer Weg, auch wenn
@@ -57,6 +61,19 @@ Virtuelle Umgebung (empfohlen):
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
+python -m pip install -r requirements.txt
+```
+
+
+## Installation
+
+Aufruf ueber python, kein chmod.
+
+Keine Extra-Systempakete.
+
+Abhaengigkeitsdatei (auch ohne Paketzeilen):
+
+```bash
 python -m pip install -r requirements.txt
 ```
 
@@ -89,38 +106,38 @@ LAN-IP mit Port nennen; Firewall ggf. oeffnen.
 
 ### Wichtige Parameter (`droo.py`)
 
-| Parameter | Typ | Standard | Bedeutung |
-|-----------|-----|----------|-----------|
-| `PORT` | int | `8000` | Port (Positionsargument) |
-| `-d DIR`, `--directory DIR` | str | `.` | Upload-Verzeichnis |
-| `-m TEXT`, `--message TEXT` | str | leer | Nachricht (escaped; HTML nur mit Flag) |
-| `--allow-html-message` | flag | aus | HTML in `--message` erlauben |
-| `-p FILE`, `--picture FILE` | str | leer | Bild auf der Upload-Seite |
-| `--dl`, `--publish-files` | flag | aus | Download-Links anzeigen |
-| `-a USER:PASS`, `--auth` | str | leer | HTTP Basic Auth |
-| `--ssl PEMFILE` | str | leer | HTTPS mit PEM-Zertifikat (+Key) |
-| `--chmod MODE` | oktal | – | Dateirechte (z. B. `644`) |
-| `--max-upload SIZE` | str | `512M` | Max. Request-Body (`100M`, `1G`, …) |
-| `--log` / `--no-log` | flag | aus | Datei-Logging ein/aus |
-| `-E`, `--Ende` | flag | aus | Am Ende auf Enter warten |
-| `-V`, `--version` | flag | – | Version, Datum, Beschreibung |
-| `--save-config` | flag | aus | Optionen in Config-Datei speichern |
-| `--delete-config` | flag | aus | Config loeschen und beenden |
-| `--config-file PATH` | str | plattformtypisch | Anderer Config-Pfad |
+| Parameter                   | Typ   | Standard         | Bedeutung                              |
+|-----------------------------|-------|------------------|----------------------------------------|
+| `PORT`                      | int   | `8000`           | Port (Positionsargument)               |
+| `-d DIR`, `--directory DIR` | str   | `.`              | Upload-Verzeichnis                     |
+| `-m TEXT`, `--message TEXT` | str   | leer             | Nachricht (escaped; HTML nur mit Flag) |
+| `--allow-html-message`      | flag  | aus              | HTML in `--message` erlauben           |
+| `-p FILE`, `--picture FILE` | str   | leer             | Bild auf der Upload-Seite              |
+| `--dl`, `--publish-files`   | flag  | aus              | Download-Links anzeigen                |
+| `-a USER:PASS`, `--auth`    | str   | leer             | HTTP Basic Auth                        |
+| `--ssl PEMFILE`             | str   | leer             | HTTPS mit PEM-Zertifikat (+Key)        |
+| `--chmod MODE`              | oktal | –                | Dateirechte (z. B. `644`)              |
+| `--max-upload SIZE`         | str   | `512M`           | Max. Request-Body (`100M`, `1G`, …)    |
+| `--log` / `--no-log`        | flag  | aus              | Datei-Logging ein/aus                  |
+| `-E`, `--Ende`              | flag  | aus              | Am Ende auf Enter warten               |
+| `-V`, `--version`           | flag  | –                | Version, Datum, Beschreibung           |
+| `--save-config`             | flag  | aus              | Optionen in Config-Datei speichern     |
+| `--delete-config`           | flag  | aus              | Config loeschen und beenden            |
+| `--config-file PATH`        | str   | plattformtypisch | Anderer Config-Pfad                    |
 
 ## Module
 
-| Datei | Rolle |
-|-------|--------|
-| `droo.py` | CLI-Einstieg, Banner, Config-Merge, Server-Start |
-| `make_pem.py` | Self-Signed-PEM via OpenSSL (fuer `--ssl`) |
-| `droo/server.py` | Threaded HTTP(S)-Handler, Auth, Seiten |
-| `droo/upload.py` | Multipart-Streaming ohne `cgi` |
-| `droo/config.py` | argparse, Config speichern/laden |
-| `droo/logutil.py` | Optionales UTF-8-Datei-Logging |
-| `droo/templates.py` | HTML/CSS (Layout aus Droopy) |
-| `droo/i18n.py` | UI-Uebersetzungen |
-| `project_meta.py` | Version, Lizenz, Attribution; gemeinsame Quelle der Dateikopf-Felder |
+| Datei               | Rolle                                                                |
+|---------------------|----------------------------------------------------------------------|
+| `droo.py`           | CLI-Einstieg, Banner, Config-Merge, Server-Start                     |
+| `make_pem.py`       | Self-Signed-PEM via OpenSSL (fuer `--ssl`)                           |
+| `droo/server.py`    | Threaded HTTP(S)-Handler, Auth, Seiten                               |
+| `droo/upload.py`    | Multipart-Streaming ohne `cgi`                                       |
+| `droo/config.py`    | argparse, Config speichern/laden                                     |
+| `droo/logutil.py`   | Optionales UTF-8-Datei-Logging                                       |
+| `droo/templates.py` | HTML/CSS (Layout aus Droopy)                                         |
+| `droo/i18n.py`      | UI-Uebersetzungen                                                    |
+| `project_meta.py`   | Version, Lizenz, Attribution; gemeinsame Quelle der Dateikopf-Felder |
 
 ## Hinweise
 
