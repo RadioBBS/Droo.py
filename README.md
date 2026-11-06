@@ -156,3 +156,10 @@ BSD-3-Clause – siehe [LICENSE](LICENSE). Copyright urspruenglich Pierre Duques
 Droo.py ist eine modernisierte Ableitung.
 
 Erstellt mit Cursor (Composer).
+
+## Screenshot
+
+![Terminal](images/Terminal.png)
+
+![Droo.py](images/Droo.py.png)
+
